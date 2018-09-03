@@ -6,6 +6,7 @@
 var http = require('http');
 var url = require('url');
 var StringDecoder = require('string_decoder').StringDecoder;
+var config = require('./config');
 
 // The server should respond to all requests with a string
 var server = http.createServer(function (req, res) {
@@ -32,7 +33,7 @@ var server = http.createServer(function (req, res) {
   var buffer = '';
   req.on('data', function (data) {
     buffer += decoder.write(data);
-  })
+  });
 
   req.on('end', function () {
     buffer += decoder.end();
@@ -46,7 +47,7 @@ var server = http.createServer(function (req, res) {
       'queryString': queryString,
       'method': method,
       'payload': buffer
-    }
+    };
 
     // Router request to the handler specified in the router.
     chosenHandler(data, function (statusCode, payload) {
@@ -62,36 +63,36 @@ var server = http.createServer(function (req, res) {
       // Return respond;
       res.setHeader('Content-Type','application/json');
       res.writeHead(statusCode);
-      res.end(payloadString)
+      res.end(payloadString);
 
 // then log path the user asked for
     // console.log('Request received path: ' + trimmedPath + ' with the method ' + method + ' with these query string params: ', queryString); 
     console.log('Returning this response: ', statusCode, payloadString);
-    })
-  })
+    });
+  });
 });
 
 //Start server  and have it listen on port 3000;
-server.listen(3000, function () {
-  console.log('Server is listening on port 3000');
+server.listen(config.port, function () {
+  console.log('Server is listening on port ' + config.port +  ' in ' + config.envName + ' now');
 });
 
 //Define handlers
-var handlers = {}
+var handlers = {};
 
 handlers.sample = function (data, callback) {
   //callback http status code and payload object
 
-  callback(406, {'name': 'sample handler'})
-}
+  callback(406, {'name': 'sample handler'});
+};
 
 //Not found handler;
 handlers.notFound = function (data, callback) {
 
-  callback(404)
-}
+  callback(404);
+};
 //Define a request router 
 
 var router = {
   'sample': handlers.sample
-}
+};
