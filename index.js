@@ -5,6 +5,7 @@
 // Dependencies
 var http = require('http');
 var url = require('url');
+var StringDecoder = require('string_decoder').StringDecoder;
 
 // The server should respond to all requests with a string
 var server = http.createServer(function (req, res) {
@@ -16,15 +17,33 @@ var server = http.createServer(function (req, res) {
   // trim all slashes from both sides of the path string
   console.log('path: ', path);
   var trimmedPath = path.replace(/^\/+|\/+$/g,'');
-  // var trimmedPath = path.replace(/^\/+|\/+$/g, '');
-  
 
-  
-  //send a response;
-  res.end(' Hello world! ');
+  //Get the HTTP methods;
+  var method = req.method.toLowerCase();  
 
-  // then log path the user asked for
-  console.log('Request received path:', trimmedPath); 
+  // Get the query string object;
+  var queryString = parsedUrl.query;
+
+  //Get headers;
+  var headers = req.headers;
+
+  //Get the payloads if it is;
+  var decoder = new StringDecoder('utf-8');
+  var buffer = '';
+  req.on('data', function (data) {
+    buffer += decoder.write(data);
+  })
+
+  req.on('end', function () {
+    buffer += decoder.end();
+    
+    //send a response;
+    res.end(' Hello world! ');
+  
+    // then log path the user asked for
+    // console.log('Request received path: ' + trimmedPath + ' with the method ' + method + ' with these query string params: ', queryString); 
+    console.log('Request received with these payload: ', buffer);
+  })
 });
 
 //Start server  and have it listen on port 3000;
