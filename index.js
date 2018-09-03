@@ -37,12 +37,37 @@ var server = http.createServer(function (req, res) {
   req.on('end', function () {
     buffer += decoder.end();
     
-    //send a response;
-    res.end(' Hello world! ');
-  
-    // then log path the user asked for
+    // choose the handler request should go to, if one isn't found use notfound handler
+    var chosenHandler = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFound;
+
+    // Construst a data object to send to the handler
+    var data = {
+      'trimmedPath': trimmedPath,
+      'queryString': queryString,
+      'method': method,
+      'payload': buffer
+    }
+
+    // Router request to the handler specified in the router.
+    chosenHandler(data, function (statusCode, payload) {
+      // Use the staus code calloed back by the handler, or default
+      statusCode = typeof(statusCode) === 'number' ? statusCode : 200;
+
+      // Use payload called back by the handler, or default too
+      payload = typeof(payload) === 'object' ? payload : {};
+
+      // Convert the payload to a string
+      var payloadString = JSON.stringify(payload);
+      
+      // Return respond;
+
+      res.writeHead(statusCode);
+      res.end(payloadString)
+
+// then log path the user asked for
     // console.log('Request received path: ' + trimmedPath + ' with the method ' + method + ' with these query string params: ', queryString); 
-    console.log('Request received with these payload: ', buffer);
+    console.log('Returning this response: ', statusCode, payloadString);
+    })
   })
 });
 
@@ -50,3 +75,23 @@ var server = http.createServer(function (req, res) {
 server.listen(3000, function () {
   console.log('Server is listening on port 3000');
 });
+
+//Define handlers
+var handlers = {}
+
+handlers.sample = function (data, callback) {
+  //callback http status code and payload object
+
+  callback(406, {'name': 'sample handler'})
+}
+
+//Not found handler;
+handlers.notFound = function (data, callback) {
+
+  callback(404)
+}
+//Define a request router 
+
+var router = {
+  'sample': handlers.sample
+}
