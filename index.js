@@ -1,5 +1,6 @@
-/**
- * Primary file for API.
+/*
+ * Primary file for API
+ *
  */
 
 // Dependencies
@@ -7,13 +8,14 @@ var http = require('http');
 var https = require('https');
 var url = require('url');
 var StringDecoder = require('string_decoder').StringDecoder;
-var config = require('./config');
+var config = require('./lib/config');
 var fs = require('fs');
-var _data = require('./lib/data');
+var handlers = require('./lib/handlers');
+var helpers = require('./lib/helpers');
 
-// Instantiating http server
-var httpServer = http.createServer(function(req, res) {
-    unifiedServer(req, res);
+ // Instantiate the HTTP server
+var httpServer = http.createServer(function(req,res){
+  unifiedServer(req,res);
 });
 
 // Instantiate https server
@@ -60,7 +62,6 @@ var unifiedServer = function(req, res) {
     req.on('data', function(data) {
         buffer += decoder.write(data);
     });
-
     req.on('end', function() {
         buffer += decoder.end();
 
@@ -75,7 +76,8 @@ var unifiedServer = function(req, res) {
             trimmedPath: trimmedPath,
             queryString: queryString,
             method: method,
-            payload: buffer
+            headers: headers,
+            payload: helpers.parseJsonToObject(buffer)
         };
 
         // Router request to the handler specified in the router.
@@ -101,27 +103,10 @@ var unifiedServer = function(req, res) {
     });
 };
 
-//Define handlers
-var handlers = {};
-
-handlers.hello = function(data, callback) {
-    callback(200, { message: 'Welcome from Hello route!' });
-};
-
-handlers.ping = function(data, callback) {
-    //callback http status code and
-    callback(200);
-};
-
-//Not found handler;
-handlers.notFound = function(data, callback) {
-    callback(404);
-};
 //Define a request router
-
 var router = {
     ping: handlers.ping,
-    hello: handlers.hello
+    hello: handlers.hello,
+    users: handlers.users
 };
 
-//All the login for both the http and https server
