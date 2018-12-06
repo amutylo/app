@@ -13,9 +13,9 @@ var fs = require('fs');
 var handlers = require('./lib/handlers');
 var helpers = require('./lib/helpers');
 
- // Instantiate the HTTP server
-var httpServer = http.createServer(function(req,res){
-  unifiedServer(req,res);
+// Instantiate the HTTP server
+var httpServer = http.createServer(function(req, res) {
+    unifiedServer(req, res);
 });
 
 // Instantiate https server
@@ -77,7 +77,10 @@ var unifiedServer = function(req, res) {
             queryString: queryString,
             method: method,
             headers: headers,
-            payload: helpers.parseJsonToObject(buffer)
+            payload:
+                buffer && buffer.length
+                    ? helpers.parseJsonToObject(buffer)
+                    : false
         };
 
         // Router request to the handler specified in the router.
@@ -109,4 +112,3 @@ var router = {
     hello: handlers.hello,
     users: handlers.users
 };
-
