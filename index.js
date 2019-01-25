@@ -13,6 +13,11 @@ var fs = require('fs');
 var handlers = require('./lib/handlers');
 var helpers = require('./lib/helpers');
 
+//@TODO Get rid of this later on
+// helpers.sendTwillioSms('5558675310', 'Hello', function(err) {
+//     console.log('Error received: ', err);
+// });
+
 // Instantiate the HTTP server
 var httpServer = http.createServer(function(req, res) {
     unifiedServer(req, res);
